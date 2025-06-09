@@ -66,3 +66,5 @@ gcc -O2 -fopenmp -mavx -o jacobi_simd jacobi_simd.c
 
 - Adrián Quiroga Linares  
 - Xabier Novoa Gómez
+
+- Nota final de prácticas 8.6

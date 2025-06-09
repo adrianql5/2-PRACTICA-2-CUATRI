@@ -34,3 +34,9 @@ Una escena ambientada en un desierto que muestra una grúa con doble texturizado
 > 🧱 Este proyecto está realizado con **OpenGL 3.3**, utilizando shaders y el pipeline programable.
 
 
+## 3. Proyecto Final 
+- [ShadersSea](https://github.com/adrianql5/ShadersSea)
+
+
+## Notas
+- Con estas prácticas saqué un 9
