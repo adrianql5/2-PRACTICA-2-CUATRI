@@ -1,3 +1,5 @@
+// Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
+
 #include "camara.h"
 
 #define DEG_TO_RAD(x) ((x) * 0.01745329252f) // Convierto grados a radianes

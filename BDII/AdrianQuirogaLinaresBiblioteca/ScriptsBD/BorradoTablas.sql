@@ -1,3 +1,5 @@
+-- Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
+
 drop table usuario;
 drop trigger beforeInsertEjemplares ON ejemplar;
 drop function introduce_num_ejemplar();

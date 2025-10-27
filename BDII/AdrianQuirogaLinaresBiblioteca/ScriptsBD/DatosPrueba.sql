@@ -1,3 +1,5 @@
+-- Copyright (c) 2025 AdriÃ¡n Quiroga Linares Lectura y referencia permitidas; reutilizaciÃ³n y plagio prohibidos
+
 Insert into categoria values ('Bases de Datos', 'Libros con contenidos relacionados con la tecnología de Sistemas Gestores de Bases de Datos');
 Insert into categoria values ('Programación', 'Libros relacionados con lenguajes y técnicas de programación');
 

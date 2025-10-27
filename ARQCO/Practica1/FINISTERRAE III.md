@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos -->
+
 # Introducción
 Este trabajo tiene como objetivo caracterizar el coste temporal asociado a la lectura (acceso) de datos mediante la implementación de un programa en lenguaje C. Se analizará cómo varía este coste al modificar distintos parámetros en el patrón de acceso y el tamaño del conjunto de datos. Además, se observará e interpretará el impacto del sistema de memorias caché del microprocesador, considerando los principios fundamentales de localidad espacial y temporal. También se explorará el efecto de las técnicas de precarga (prefetching) de datos, con el fin de comprender mejor cómo optimizar el acceso a la memoria y mejorar el rendimiento del sistema.
 
