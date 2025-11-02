@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
+
 #1- cat /etc/passwd > ~/passwd_copia
 #2- cat /ect/passwd >> ~/passwd_copia wc passwd_copia
 # Código hecho por Xabier Nóvoa y Adrián Quiroga

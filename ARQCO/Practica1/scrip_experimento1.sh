@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
+
 #SBATCH -n 1 -c 64 -t 00:10:00 --mem=200G
 #SBATCH --job-name p1acg04
 

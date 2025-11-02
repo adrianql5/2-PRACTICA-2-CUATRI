@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
+
 # Código hecho por Xabier Nóvoa y Adrián Quiroga
 if [ $# -ne 1 ]; then
     echo "Uso: $0 MM:DD:AAAA"

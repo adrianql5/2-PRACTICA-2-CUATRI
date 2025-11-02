@@ -1,4 +1,6 @@
 #! /bin/bash
+# Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
+
 #Código hecho por Xabier Nóvoa Gómez y Adrián Quiroga
 if [ "$#" -ne 2 ]; then
     echo "Uso: $0 [-c, GET/POST, -s] directorio_origen"
