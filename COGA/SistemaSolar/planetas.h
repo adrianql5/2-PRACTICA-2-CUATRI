@@ -1,8 +1,7 @@
-// Copyright (c) 2025 Adri谩n Quiroga Linares Lectura y referencia permitidas; reutilizaci贸n y plagio prohibidos
+// Copyright (c) 2025 Adrian Quiroga Linares. Lectura y referencia permitidas; reutilizacion y plagio prohibidos.
 
 #pragma once
-#include <windows.h>	
-#include <glut.h>
+#include "gl_platform.h"
 #define MAX_SATELITES 10
 
 
@@ -21,13 +20,13 @@ typedef struct Planeta {
 	float posicion[3];
 	float color[3];
 
-	float distanciaOrbita; // Radio de la 髍bita con respecto a su estrella/padre
+	float distanciaOrbita; // Radio de la 贸rbita con respecto a su estrella/padre
 
-	int nSatelites=0; // N鷐ero de sat閘ites naturales (inicializado en 0)
-	struct Planeta* satelites[MAX_SATELITES]; // Array de punteros a sat閘ites (otros planetas que orbitan este)
+	int nSatelites=0; // N煤mero de sat茅lites naturales (inicializado en 0)
+	struct Planeta* satelites[MAX_SATELITES]; // Array de punteros a sat茅lites (otros planetas que orbitan este)
 	Planeta* padre; // Puntero al planeta alrededor del cual orbita este planeta
 
-    int lista; // Identificador de la lista de visualizaci髇 en OpenGL (almacena su representaci髇 gr醘ica)
+    int lista; // Identificador de la lista de visualizaci贸n en OpenGL (almacena su representaci贸n gr谩fica)
 
 	GLuint textura;
 

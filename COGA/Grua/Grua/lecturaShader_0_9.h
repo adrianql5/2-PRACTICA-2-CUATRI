@@ -1,5 +1,3 @@
-// Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
-
 /******************************************
   Lectura y Creacion de Shaders
 *******************************************/
@@ -7,15 +5,15 @@
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS //Evitamos alguno errores de funciones no seguras
-#endif
 #pragma warning(disable:4996) //Evitamos alguno errores de funciones no seguras
+#endif
 
 //Librerias necesarias 
-#include <glad.h>
-#include <glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "deps.h"
 
 
 GLuint vertexShader, fragmentShader; // Definicion  vertex y fragment shader
@@ -108,9 +106,9 @@ GLuint setShaders(const char *nVertx, const char *nFrag) {
 	
 	//Leo el codigo del ficheo y hay error devuelve un NULL
 	ficherovs = textFileRead(nVertx);
-		if (ficherovs == NULL) return NULL;
+		if (ficherovs == NULL) return 0;
 	ficherofs = textFileRead(nFrag);
-		if (ficherofs == NULL) return NULL;
+		if (ficherofs == NULL) return 0;
 
 	//Lo igual al puntero para cargarlos
 	codigovs = ficherovs;

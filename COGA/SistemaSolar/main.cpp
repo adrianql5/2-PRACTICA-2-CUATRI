@@ -1,8 +1,8 @@
-// Copyright (c) 2025 Adri√°n Quiroga Linares Lectura y referencia permitidas; reutilizaci√≥n y plagio prohibidos
+// Copyright (c) 2025 Adrian Quiroga Linares. Lectura y referencia permitidas; reutilizacion y plagio prohibidos.
 
 /*
 
-    Codigo escrito por Adri·n Quiroga Linares
+    Codigo escrito por Adri√°n Quiroga Linares
 
 */
 
@@ -11,11 +11,12 @@
 #include "figuras.h"
 #include "camaraTeclado.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include <SOIL.h>
 
 #define PI 3.14159265359
-#define MYTIEMPO 1  // Define el intervalo de tiempo  entre cada actualizaciÛn
+#define MYTIEMPO 1  // Define el intervalo de tiempo  entre cada actualizaci√≥n
 
 extern int dibujarOrbitas;
 extern int dibujarEjes;
@@ -26,7 +27,7 @@ extern int luzEncendida;
 const int W_WIDTH = 500;
 const int W_HEIGHT = 500;
 
-// Array de astros global que se inicializa en el main llamando a la funciÛn crearSistema
+// Array de astros global que se inicializa en el main llamando a la funci√≥n crearSistema
 Planeta** sistemaSolar; 
 
 
@@ -39,7 +40,7 @@ float calcularVelocidadRotacion(float num){
         return (((360 / num) * 0.005));
 }
 
-// Funcion que inicaliza los datos de todos los astros que apareceran en el sistema solar. Es un array de planetas. Los datos tratan de ser lo m·s realistas posibles.
+// Funcion que inicaliza los datos de todos los astros que apareceran en el sistema solar. Es un array de planetas. Los datos tratan de ser lo m√°s realistas posibles.
 Planeta ** crearSistema(){
         
         Planeta **arr = (Planeta **) malloc(11 * sizeof(Planeta *));
@@ -56,7 +57,7 @@ Planeta ** crearSistema(){
         float colorLuna[3] = { 1.0f, 1.0f, 1.0f }; // Gris claro
         float colorISS[3] = { 1.0f, 1.0f, 1.0f }; // Gris
         float colorMarte[3] = { 1.0f, 1.0f, 1.0f }; // Rojo
-        float colorJupiter[3] = { 1.0f, 1.0f, 1.0f }; // MarrÛn
+        float colorJupiter[3] = { 1.0f, 1.0f, 1.0f }; // Marr√≥n
         float colorSaturno[3] = { 1.0f, 1.0f, 1.0f }; // Beige
         float colorUrano[3] = { 1.0f, 1.0f, 1.0f }; // Azul claro
 
@@ -80,7 +81,7 @@ Planeta ** crearSistema(){
         return arr;
 }
 
-//Libero los recursos asociados al sistema tras la ejecuciÛn dle programa.
+//Libero los recursos asociados al sistema tras la ejecuci√≥n dle programa.
 void destruirSistema(Planeta **sistema){
         if (!sistema)
                 return;
@@ -92,7 +93,7 @@ void destruirSistema(Planeta **sistema){
 
 
 
-// FunciÛn que dibuja las Ûrbitas de todos los planetas
+// Funci√≥n que dibuja las √≥rbitas de todos los planetas
 void dibujarOrbita(float radio, float inclinacion){
         glDisable(GL_TEXTURE_2D);
         int n = 360;
@@ -105,7 +106,7 @@ void dibujarOrbita(float radio, float inclinacion){
                 float angulo = (i * 2 * PI) / n;
                 float x = radio * cos(angulo);
                 float z = radio * sin(angulo);
-                float y = sin(inclinacion) * z; // Aplicamos inclinaciÛn en Y
+                float y = sin(inclinacion) * z; // Aplicamos inclinaci√≥n en Y
                 z = cos(inclinacion) * z; // Ajustamos la nueva coordenada Z
                 glVertex3f(x, y, z);
         }
@@ -122,7 +123,7 @@ void calcularPosicion(Planeta *p){
 
         float x=0, y=0, z=0;
 
-        // Aplico la inclinaciÛn si es la Luna o la ISS
+        // Aplico la inclinaci√≥n si es la Luna o la ISS
         float inclinacion = 0.0f;
         if (strcmp(p->nombre, "luna") == 0)
                 inclinacion = 45.0f * PI / 180.0f;
@@ -133,7 +134,7 @@ void calcularPosicion(Planeta *p){
         y = sin(inclinacion) * p->distanciaOrbita * sin(p->anguloTraslacion) ;
         z = p->distanciaOrbita * sin(p->anguloTraslacion) * cos(inclinacion);
 
-        // Guardo la nueva posiciÛn
+        // Guardo la nueva posici√≥n
         p->posicion[0] = x;
         p->posicion[1] = y;
         p->posicion[2] = z;
@@ -144,7 +145,7 @@ void calcularPosicion(Planeta *p){
 
 
 
-//FunciÛn m·s importante del programa. Se plantea de forma recursiva lo que permite ahorrar muchas lÌneas de cÛdigo, puesto que sabemos que cada planeta orbita a otro a excepciÛn del sol
+//Funci√≥n m√°s importante del programa. Se plantea de forma recursiva lo que permite ahorrar muchas l√≠neas de c√≥digo, puesto que sabemos que cada planeta orbita a otro a excepci√≥n del sol
 void dibujarPlaneta(Planeta *p){
         if (iluminacion) glEnable(GL_LIGHTING);
         else glDisable(GL_LIGHTING);
@@ -152,7 +153,7 @@ void dibujarPlaneta(Planeta *p){
         if (p == nullptr) //si p es null salgo de la llamada recursiva
                 return;
 
-        //Guardo la matriz donde me sit˙o actualmente
+        //Guardo la matriz donde me sit√∫o actualmente
         glPushMatrix();
         if (strcmp(p->nombre, "sol")==0 && luzEncendida) glDisable(GL_LIGHTING);
             float inclinacion = 0.0;
@@ -161,10 +162,10 @@ void dibujarPlaneta(Planeta *p){
             else if (strcmp(p->nombre, "iss") == 0)
                     inclinacion = 25.0 * PI / 180.0;
 
-            // En caso de querer dibujar las Ûrbitas se dibujan
+            // En caso de querer dibujar las √≥rbitas se dibujan
             if (dibujarOrbitas) dibujarOrbita(p->distanciaOrbita, inclinacion);
 
-            // traslado el planeta a su posiciÛn
+            // traslado el planeta a su posici√≥n
             glTranslatef(p->posicion[0], p->posicion[1], p->posicion[2]);
             
             // guardo la matriz
@@ -189,7 +190,7 @@ void dibujarPlaneta(Planeta *p){
                 if (strcmp(p->nombre, "sol")==0) glEnable(GL_LIGHTING);
             glPopMatrix();
 
-            // llamo recursivamente a la funcion para pintar sus satÈlites
+            // llamo recursivamente a la funcion para pintar sus sat√©lites
             for (int i = 0; i < p->nSatelites; i++) {
                    dibujarPlaneta(p->satelites[i]);
             }
@@ -213,13 +214,14 @@ void dibujoSistemaSolar(){
         Planeta *sol = encontrarPlaneta(sistemaSolar, 10, "sol");
         dibujarPlaneta(sol);
 
-        //intercambio los buffers y fuerzo la impresiÛn
+        //intercambio los buffers y fuerzo la impresi√≥n
         glutSwapBuffers();
         glFlush();
 }
 
 // funcion que va a actualizar la posicion de los planetas
 void actualizar(int n){
+        (void)n;
         for (int i = 0; i < 10; i++) {
             if (sistemaSolar[i] != NULL) {
                    sistemaSolar[i]->anguloTraslacion += sistemaSolar[i]->velocidadTraslacion;
@@ -243,7 +245,7 @@ void actualizar(int n){
 
 //no pongo el cuttoff porque es una fuente puntual de luz, no un foco puntual
 void iniciarLuces() {
-    // Luz ambiental: dÈbil pero presente en toda la escena
+    // Luz ambiental: d√©bil pero presente en toda la escena
     GLfloat luzAmbiente[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 
     // Luz difusa: luz amarilla que reciben los planetas desde el Sol
@@ -252,23 +254,23 @@ void iniciarLuces() {
     // Luz especular: reflejos blancos en los objetos con brillo
     GLfloat luzEspecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-    // PosiciÛn del Sol (luz puntual en el origen)
+    // Posici√≥n del Sol (luz puntual en el origen)
     GLfloat luzPosicion[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    // ConfiguraciÛn de la luz ambiental, difusa y especular
+    // Configuraci√≥n de la luz ambiental, difusa y especular
     glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
     glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular);
 
-    // Definir la posiciÛn de la luz (en el origen, donde est· el Sol)
+    // Definir la posici√≥n de la luz (en el origen, donde est√° el Sol)
     glLightfv(GL_LIGHT0, GL_POSITION, luzPosicion);
 
-    // ConfiguraciÛn de atenuaciÛn 
-    glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);  // Mantiene algo de iluminaciÛn constante
-    glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0005f); // AtenuaciÛn leve con la distancia
-    glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.00002f); // Mayor atenuaciÛn para planetas lejanos
+    // Configuraci√≥n de atenuaci√≥n 
+    glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);  // Mantiene algo de iluminaci√≥n constante
+    glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0005f); // Atenuaci√≥n leve con la distancia
+    glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.00002f); // Mayor atenuaci√≥n para planetas lejanos
 
-    // Habilitar iluminaciÛn y modelo de sombreado suave para transiciones de luz m·s naturales
+    // Habilitar iluminaci√≥n y modelo de sombreado suave para transiciones de luz m√°s naturales
     glEnable(GL_LIGHTING);
     glShadeModel(GL_SMOOTH);
 
@@ -279,7 +281,7 @@ void iniciarLuces() {
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-    // ConfiguraciÛn de materiales para los planetas
+    // Configuraci√≥n de materiales para los planetas
     GLfloat mat_ambiente[] = { 0.3f, 0.3f, 0.3f, 1.0f };  // Reflejo ambiental leve
     GLfloat mat_difuso[] = { 0.6f, 0.6f, 0.6f, 1.0f };    // Tono medio para los planetas
     GLfloat mat_especular[] = { .5f, .5f, .5f, .5f }; // Brillo especular suave
@@ -300,7 +302,7 @@ void iniciar(){
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         
-        glEnable(GL_NORMALIZE); // Normaliza las normales autom·ticamente
+        glEnable(GL_NORMALIZE); // Normaliza las normales autom√°ticamente
 
         glEnable(GL_TEXTURE_2D);
 
@@ -311,9 +313,9 @@ void iniciar(){
 
 
 
-//funcion para cuando cambie de tamaÒo la pantalla
+//funcion para cuando cambie de tama√±o la pantalla
 void reshape(GLint newWidth, GLint newHeight){
-        //establezco el area de visualizacion de opengl segun el nuevo tamaÒo de la ventana
+        //establezco el area de visualizacion de opengl segun el nuevo tama√±o de la ventana
         glViewport(0, 0, newWidth, newHeight);
 
         //Ajusto la camara dados los nuevos datos
@@ -326,7 +328,7 @@ void reshape(GLint newWidth, GLint newHeight){
 int main(int argc, char **argv){
         glutInit(&argc, argv); //incio glut
 
-        glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE); //indico que uso rgba y double buffer
+        glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH); //indico que uso rgba, double buffer y depth buffer
 
         glutInitWindowSize(W_WIDTH, W_HEIGHT); //indico las dimensiones inciales de la pantalla
         glutInitWindowPosition(100, 100); //Especifico la posicion inicial

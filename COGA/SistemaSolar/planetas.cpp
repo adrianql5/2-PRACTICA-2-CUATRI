@@ -1,81 +1,67 @@
-// Copyright (c) 2025 Adri√°n Quiroga Linares Lectura y referencia permitidas; reutilizaci√≥n y plagio prohibidos
+// Copyright (c) 2025 Adrian Quiroga Linares. Lectura y referencia permitidas; reutilizacion y plagio prohibidos.
+
+#include "planetas.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-
-#include <windows.h>	
-#include <glut.h>
+#include <string>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
+static std::string resolverRutaTextura(const char* nombre) {
+    const std::string candidatos[] = {
+        std::string(nombre),
+        std::string("SistemaSolarFinal/") + nombre
+    };
 
-#define MAX_SATELITES 10
+    for (const std::string& ruta : candidatos) {
+        FILE* archivo = fopen(ruta.c_str(), "rb");
+        if (archivo != NULL) {
+            fclose(archivo);
+            return ruta;
+        }
+    }
 
-
-typedef struct Planeta {
-    char nombre[15];
-    float tamano;
-
-    float velocidadTraslacion;
-    float velocidadRotacion;
-
-    float anguloTraslacion;
-    float anguloRotacion;
-
-    float posicion[3];
-    float color[3];
-
-    float distanciaOrbita;
-    int nSatelites;
-    struct Planeta* satelites[MAX_SATELITES];
-    Planeta* padre;
-
-    int lista;
-    
-    GLuint textura;
-
-} Planeta;
+    return std::string(nombre);
+}
 
 
 GLuint cargaTextura(const char* nombre){
-    GLuint textura;
+    const std::string ruta = resolverRutaTextura(nombre);
+    stbi_set_flip_vertically_on_load(1);
+
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+    unsigned char* data = stbi_load(ruta.c_str(), &width, &height, &channels, 0);
+
+    if (data == NULL) {
+        printf("Error cargando la textura '%s': %s\n", ruta.c_str(), stbi_failure_reason());
+        return 0;
+    }
+
+    GLenum formato = GL_RGB;
+    if (channels == 1) {
+        formato = GL_RED;
+    } else if (channels == 3) {
+        formato = GL_RGB;
+    } else if (channels == 4) {
+        formato = GL_RGBA;
+    }
+
+    GLuint textura = 0;
     glGenTextures(1, &textura);
     glBindTexture(GL_TEXTURE_2D, textura);
-
-    // ConfiguraciÛn de wrapping y filtrado
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Invertir imagen verticalmente al cargar (OpenGL lo necesita)
-    stbi_set_flip_vertically_on_load(1);
-
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(nombre, &width, &height, &nrChannels, 0);
-
-    if (data)
-    {
-        if (nrChannels == 3)
-        {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            //glGenerateMipmap(GL_TEXTURE_2D); // Si quieres mipmaps
-        }
-        if (nrChannels == 4)
-        {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-            //glGenerateMipmap(GL_TEXTURE_2D); // Si quieres mipmaps
-        }
-
-    }
-    else {
-        printf("Error en las texturas.\n");
-    }
+    glTexImage2D(GL_TEXTURE_2D, 0, formato, width, height, 0, formato, GL_UNSIGNED_BYTE, data);
 
     stbi_image_free(data);
+
     return textura;
 }
 
@@ -91,7 +77,8 @@ Planeta* crearPlaneta(const char nombre[15], float tamano, float velocidadTrasla
     }
 
 
-    strncpy_s(nuevoPlaneta->nombre, sizeof(nuevoPlaneta->nombre), nombre, _TRUNCATE);
+    strncpy(nuevoPlaneta->nombre, nombre, sizeof(nuevoPlaneta->nombre) - 1);
+    nuevoPlaneta->nombre[sizeof(nuevoPlaneta->nombre) - 1] = '\0';
 
 
     // Inicializar propiedades del planeta
@@ -111,22 +98,22 @@ Planeta* crearPlaneta(const char nombre[15], float tamano, float velocidadTrasla
         nuevoPlaneta->textura = cargaTextura(archivoTextura);
     }
     else {
-        nuevoPlaneta->textura = 0; // O alg˙n valor por defecto
+        nuevoPlaneta->textura = 0; // O alg√∫n valor por defecto
     }
 
-    // Inicializar la lista de satÈlites con NULL
+    // Inicializar la lista de sat√©lites con NULL
     for (int i = 0; i < MAX_SATELITES; i++) {
         nuevoPlaneta->satelites[i] = NULL;
     }
 
-    // Verificar que planetaQueOrbita no sea NULL antes de acceder a Èl
+    // Verificar que planetaQueOrbita no sea NULL antes de acceder a √©l
     if (padre != NULL) {
         if (padre->nSatelites < MAX_SATELITES) {
             padre->satelites[padre->nSatelites] = nuevoPlaneta;
             padre->nSatelites++;
         }
         else {
-            printf("Advertencia: %s no puede tener m·s de %d satÈlites.\n", padre->nombre, MAX_SATELITES);
+            printf("Advertencia: %s no puede tener m√°s de %d sat√©lites.\n", padre->nombre, MAX_SATELITES);
         }
     }
 

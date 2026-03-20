@@ -1,14 +1,9 @@
-// Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
-
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <glad.h>
-#include <glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+
+#include "deps.h"
 
 
 extern float alpha;

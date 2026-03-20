@@ -1,6 +1,6 @@
-// Copyright (c) 2025 AdriÃ¡n Quiroga Linares Lectura y referencia permitidas; reutilizaciÃ³n y plagio prohibidos
+// Copyright (c) 2025 Adrian Quiroga Linares. Lectura y referencia permitidas; reutilizacion y plagio prohibidos.
 
-#include <glut.h>
+#include "figuras.h"
 #include <math.h>
 
 
@@ -32,12 +32,12 @@ void myEjes() {
 	glEnd();
 }
 
-//Funcion que define una lista para representar los vértices de la ISS (es una tetera porque mola)
+//Funcion que define una lista para representar los vÃ©rtices de la ISS (es una tetera porque mola)
 int myISS() {
 
     int indice;
 
-    indice = glGenLists(1); //genero un identifcador único para la lista
+    indice = glGenLists(1); //genero un identifcador Ãºnico para la lista
 
     glNewList(indice, GL_COMPILE);//creo la lista
 
@@ -48,7 +48,7 @@ int myISS() {
     return indice;
 }
 
-//Funcion que define una lista para representar los vértices del anillo de Saturno
+//Funcion que define una lista para representar los vÃ©rtices del anillo de Saturno
 void dibujarElipse(float radioMayor, float radioMenor) {
 	int n = 360;
 
@@ -70,7 +70,7 @@ void dibujarElipse(float radioMayor, float radioMenor) {
 int mySaturno(GLfloat tam) {
 
     int indice;
-    indice =glGenLists(1); //genero un identifcador único para la lista
+    indice =glGenLists(1); //genero un identifcador Ãºnico para la lista
     glNewList(indice, GL_COMPILE); //creo la lista
 
 	glPushMatrix();

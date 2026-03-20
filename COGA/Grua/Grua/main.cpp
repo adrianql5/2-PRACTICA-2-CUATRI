@@ -1,28 +1,39 @@
-// Copyright (c) 2025 Adri√°n Quiroga Linares Lectura y referencia permitidas; reutilizaci√≥n y plagio prohibidos
-
 /*
 
-    Codigo escrito por Adri·n Quiroga Linares
+    Codigo escrito por Adri√°n Quiroga Linares
 
 */
 
-#include <Windows.h>
+#include <algorithm>
+#include <filesystem>
 #include <iostream>
 #include <stdio.h>
+#include <string>
 
-#include <glad.h>
-#include <glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <unordered_map>
+#include <vector>
 
+#if defined(__linux__)
+#include <unistd.h>
+#endif
+
+#include "deps.h"
 #include "lecturaShader_0_9.h"
 #include "objetos.h"
 #include "camara.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+#if defined(__has_include)
+#if __has_include(<stb_image.h>)
 #include <stb_image.h>
+#elif __has_include(<stb/stb_image.h>)
+#include <stb/stb_image.h>
+#else
+#error "No se encontro stb_image.h. Instala stb o anade su directorio de includes al Makefile."
+#endif
+#else
+#include <stb_image.h>
+#endif
 
 #define RGB_TO_FLOAT(x) ((x) / 256.0f) //convierto RGB  a float
 #define DEG_TO_RAD(x) ((x) * 0.01745329252f) //convierto grados a radianes
@@ -37,11 +48,11 @@ using namespace glm; //con esto me ahorro de andar usando todo el rato glm::
 int W_WIDTH = 800;
 int W_HEIGHT = 800;
 
-int modoCamara = 1; // Modo de c·mara inicial (1 = exterior, 2 = primera persona, 3 = tercera persona)
+int modoCamara = 1; // Modo de c√°mara inicial (1 = exterior, 2 = primera persona, 3 = tercera persona)
 
 int iluminacionNoct = 1;
 
-// Mapa de teclas para detectar m˙ltiples entradas
+// Mapa de teclas para detectar m√∫ltiples entradas
 std::unordered_map<int, bool> teclas;
 std::unordered_map<int, bool> teclas2;
 
@@ -98,6 +109,11 @@ void processInput(GLFWwindow* window);
 void tiempo();
 GLuint cargaTextura(const char* nombre);
 void iniciarTexturas();
+void glfwErrorCallback(int error, const char* description);
+void inicializarRutaRecursos(const char* argv0);
+std::string rutaRecurso(const char* nombre);
+
+std::filesystem::path rutaBaseRecursos;
 
 
 
@@ -219,20 +235,20 @@ void dibujarRuedas(mat4 matGrua) {
 
 //funcion del display
 void display() {
-    // Actualiza el tiempo de animaciones o lÛgica
+    // Actualiza el tiempo de animaciones o l√≥gica
     tiempo();
 
-    // Actualiza posiciones y movimientos (e.g., del rover, gr˙a, etc.)
+    // Actualiza posiciones y movimientos (e.g., del rover, gr√∫a, etc.)
     movimiento();
 
-    // Obtiene la ubicaciÛn de las variables uniformes en el shader
+    // Obtiene la ubicaci√≥n de las variables uniformes en el shader
     unsigned int transformLoc = glGetUniformLocation(shadersProgram, "model");
     unsigned int colorLoc = glGetUniformLocation(shadersProgram, "objectColor");
 
     // ----------------------
     // DIBUJAR EL TERRENO
     // ----------------------
-    mat4 transform = mat4(); // matriz identidad
+    mat4 transform = mat4(1.0f); // matriz identidad
     transform = scale(transform, terreno.escalado); // aplica escalado
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform)); // pasa la matriz al shader
 
@@ -256,19 +272,19 @@ void display() {
     dibujarAccesorios();
 
     // ----------------------
-    // DIBUJAR BASE DEL ROVER / GR⁄A
+    // DIBUJAR BASE DEL ROVER / GR√öA
     // ----------------------
 
-    // Indico al shader que usarÈ doble textura para este objeto
+    // Indico al shader que usar√© doble textura para este objeto
     unsigned int nTexturasLoc = glGetUniformLocation(shadersProgram, "nTexturas");
     glUniform1i(nTexturasLoc, 1);
 
-    // Reseteo la transformaciÛn y aplico traslaciÛn y rotaciÛn
-    transform = mat4();
+    // Reseteo la transformaci√≥n y aplico traslaci√≥n y rotaci√≥n
+    transform = mat4(1.0f);
     transform = translate(transform, base.pos);
     transform = rotate(transform, DEG_TO_RAD(base.angulo_trans - 90), vec3(0, 1, 0));
 
-    mat4 matGrua = transform; // guardo la transformaciÛn de la base para usarla en piezas hijas
+    mat4 matGrua = transform; // guardo la transformaci√≥n de la base para usarla en piezas hijas
 
     transform = scale(transform, base.escalado);
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
@@ -288,7 +304,7 @@ void display() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // Desactivo textura doble para prÛximos objetos
+    // Desactivo textura doble para pr√≥ximos objetos
     glUniform1i(nTexturasLoc, 0);
 
     // ----------------------
@@ -318,7 +334,7 @@ void display() {
 
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(matGrua));
 
-    // Cambia el color del foco seg˙n la velocidad del vehÌculo
+    // Cambia el color del foco seg√∫n la velocidad del veh√≠culo
     if (base.velocidad == 0) {
         foco.color = { RGB_TO_FLOAT(0), RGB_TO_FLOAT(0), RGB_TO_FLOAT(0) }; // apagado
     }
@@ -371,7 +387,7 @@ void display() {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // ----------------------
-    // ARTICULACI”N 1 (rotaciÛn eje Y)
+    // ARTICULACI√ìN 1 (rotaci√≥n eje Y)
     // ----------------------
     matGrua = matAux;
     matGrua = translate(matGrua, articulacion1.pos);
@@ -389,7 +405,7 @@ void display() {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // ----------------------
-    // ARTICULACI”N 2 (rotaciÛn eje Z)
+    // ARTICULACI√ìN 2 (rotaci√≥n eje Z)
     // ----------------------
     matGrua = matArticulacion1;
     matGrua = translate(matGrua, articulacion2.pos);
@@ -426,61 +442,61 @@ void display() {
     // RUEDAS
     // ----------------------
     matGrua = matAux;
-    dibujarRuedas(matGrua); // funciÛn externa que dibuja todas las ruedas
+    dibujarRuedas(matGrua); // funci√≥n externa que dibuja todas las ruedas
 
 }
 
 
-// Configura la iluminaciÛn para el modo diurno
+// Configura la iluminaci√≥n para el modo diurno
 void iluminacionDiurn() {
     // Establece el color de fondo del "cielo" en modo diurno (cielo celeste)
     glClearColor(RGB_TO_FLOAT(85), RGB_TO_FLOAT(228), RGB_TO_FLOAT(249), 1);
 
-    // Obtiene la ubicaciÛn del uniform 'iluminacionNocturna' en el shader y lo desactiva (modo dÌa)
+    // Obtiene la ubicaci√≥n del uniform 'iluminacionNocturna' en el shader y lo desactiva (modo d√≠a)
     unsigned int soloAmbienteLoc = glGetUniformLocation(shadersProgram, "iluminacionNocturna");
     glUniform1i(soloAmbienteLoc, 0);  // 0 = falso
 
-    // Define el color de la luz en modo dÌa: luz blanca ambiental
+    // Define el color de la luz en modo d√≠a: luz blanca ambiental
     unsigned int lightLoc = glGetUniformLocation(shadersProgram, "lightColor");
     glUniform3f(lightLoc, 1.f, 1.f, 1.f);  // Luz blanca completa (RGB 1,1,1)
 }
 
-// Configura la iluminaciÛn para el modo nocturno, incluyendo una luz tipo spotlight
+// Configura la iluminaci√≥n para el modo nocturno, incluyendo una luz tipo spotlight
 void iluminacionNocturn() {
     // Establece el color de fondo oscuro para simular la noche
     glClearColor(RGB_TO_FLOAT(10), RGB_TO_FLOAT(10), RGB_TO_FLOAT(10), 1);
 
-    // Activa la iluminaciÛn nocturna (solo luz ambiental y spotlight)
+    // Activa la iluminaci√≥n nocturna (solo luz ambiental y spotlight)
     unsigned int soloAmbienteLoc = glGetUniformLocation(shadersProgram, "iluminacionNocturna");
     glUniform1i(soloAmbienteLoc, 1);  // 1 = verdadero
 
-    // Establece la posiciÛn de la fuente de luz (por ejemplo, un faro de la gr˙a)
+    // Establece la posici√≥n de la fuente de luz (por ejemplo, un faro de la gr√∫a)
     unsigned int lightPosLoc = glGetUniformLocation(shadersProgram, "lightPos");
     glUniform3f(lightPosLoc, base.pos[0], base.pos[1], base.pos[2]);
 
-    // Define la direcciÛn en la que apunta la luz (basada en el ·ngulo de rotaciÛn de la base)
+    // Define la direcci√≥n en la que apunta la luz (basada en el √°ngulo de rotaci√≥n de la base)
     unsigned int lightDirLoc = glGetUniformLocation(shadersProgram, "luzDir");
     glUniform3f(lightDirLoc,
-        sin(DEG_TO_RAD(base.angulo_trans)), // direcciÛn X
-        0,                                  // direcciÛn Y fija (plana)
-        cos(DEG_TO_RAD(base.angulo_trans))  // direcciÛn Z
+        sin(DEG_TO_RAD(base.angulo_trans)), // direcci√≥n X
+        0,                                  // direcci√≥n Y fija (plana)
+        cos(DEG_TO_RAD(base.angulo_trans))  // direcci√≥n Z
     );
 
     // Establece el color de la luz (puede cambiar dependiendo del tipo de foco usado)
     unsigned int lightColorLoc = glGetUniformLocation(shadersProgram, "lightColor");
     glUniform3f(lightColorLoc, faro.color[0], faro.color[1], faro.color[2]);
 
-    // ¡ngulo interno del foco (cut-off brusco del cono de luz)
+    // √Ångulo interno del foco (cut-off brusco del cono de luz)
     unsigned int innerCutOffLoc = glGetUniformLocation(shadersProgram, "innerCutOff");
-    glUniform1f(innerCutOffLoc, cos(glm::radians(15.0f)));  // Luz fuerte dentro de 15∞
+    glUniform1f(innerCutOffLoc, cos(glm::radians(15.0f)));  // Luz fuerte dentro de 15¬∞
 
-    // ¡ngulo externo del foco (transiciÛn gradual a oscuridad)
+    // √Ångulo externo del foco (transici√≥n gradual a oscuridad)
     unsigned int outerCutOffLoc = glGetUniformLocation(shadersProgram, "outerCutOff");
-    glUniform1f(outerCutOffLoc, cos(glm::radians(20.0f)));  // De 15∞ a 20∞ se desvanece
+    glUniform1f(outerCutOffLoc, cos(glm::radians(20.0f)));  // De 15¬∞ a 20¬∞ se desvanece
 }
 
 
-// ConfiguraciÛn inicial de OpenGL
+// Configuraci√≥n inicial de OpenGL
 void iniciar() {
     // Defino el color de fondo utilizando valores RGB convertidos a float (escala 0-1)
     glClearColor(RGB_TO_FLOAT(85), RGB_TO_FLOAT(228), RGB_TO_FLOAT(249), 1);
@@ -491,7 +507,7 @@ void iniciar() {
     // Habilito el test de profundidad para que los objetos 3D se rendericen correctamente
     glEnable(GL_DEPTH_TEST);
 
-    // Habilito la eliminaciÛn de caras traseras para mejorar el rendimiento
+    // Habilito la eliminaci√≥n de caras traseras para mejorar el rendimiento
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
@@ -499,15 +515,24 @@ void iniciar() {
 }
 
 
-// FunciÛn principal
+// Funci√≥n principal
 int main(int argc, char** argv) {
+    (void)argc;
+
+    inicializarRutaRecursos(argv[0]);
+
+    glfwSetErrorCallback(glfwErrorCallback);
+#if defined(__linux__)
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+#endif
+
     // Inicializo GLFW
     if (!glfwInit()) {
         std::cerr << "Error al inicializar GLFW" << std::endl;
         return -1;
     }
 
-    // Especifico la versiÛn de OpenGL a usar (3.3 Core Profile)
+    // Especifico la versi√≥n de OpenGL a usar (3.3 Core Profile)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -515,7 +540,7 @@ int main(int argc, char** argv) {
     // Creo una ventana GLFW
     GLFWwindow* window = glfwCreateWindow(W_WIDTH, W_HEIGHT, "Grua", NULL, NULL);
 
-    // Verifico si la ventana se creÛ correctamente
+    // Verifico si la ventana se cre√≥ correctamente
     if (!window) {
         std::cerr << "Error al crear la ventana" << std::endl;
         glfwTerminate();
@@ -525,11 +550,23 @@ int main(int argc, char** argv) {
     // Establezco la ventana como el contexto actual
     glfwMakeContextCurrent(window);
 
-    // Cargo los punteros de funciones OpenGL con GLAD
+    // Cargo los punteros de funciones OpenGL
+#if defined(__linux__)
+    glewExperimental = GL_TRUE;
+    GLenum glewStatus = glewInit();
+    if (glewStatus != GLEW_OK) {
+        std::cerr << "Error al inicializar GLEW: "
+                  << reinterpret_cast<const char*>(glewGetErrorString(glewStatus))
+                  << std::endl;
+        return -1;
+    }
+    glGetError(); // GLEW puede dejar un GL_INVALID_ENUM espurio tras inicializarse
+#else
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Error al inicializar GLAD" << std::endl;
         return -1;
     }
+#endif
 
     // Defino el viewport de la ventana
     glViewport(0, 0, W_WIDTH, W_HEIGHT);
@@ -543,14 +580,16 @@ int main(int argc, char** argv) {
     iniciarTexturas();
 
     // Cargo y compilo los shaders desde archivos externos
-    shadersProgram = setShaders("shader.vert", "shader.frag");
+    const std::string shaderVert = rutaRecurso("shader.vert");
+    const std::string shaderFrag = rutaRecurso("shader.frag");
+    shadersProgram = setShaders(shaderVert.c_str(), shaderFrag.c_str());
 
     glUseProgram(shadersProgram);
 
     glUniform1i(glGetUniformLocation(shadersProgram, "objectTexture"), 0);
     glUniform1i(glGetUniformLocation(shadersProgram, "objectTexture2"), 1);
 
-    // Genero los modelos b·sicos para renderizar la escena
+    // Genero los modelos b√°sicos para renderizar la escena
     crearCubo();
     crearCuadrado();
     crearEsfera();
@@ -565,7 +604,7 @@ int main(int argc, char** argv) {
         // Limpio los buffers de color y profundidad antes de renderizar la nueva escena
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Configuro la c·mara seg˙n el modo seleccionado
+        // Configuro la c√°mara seg√∫n el modo seleccionado
         switch (modoCamara) {
         case 1:
             myCamaraExterior(W_WIDTH, W_HEIGHT);
@@ -578,11 +617,19 @@ int main(int argc, char** argv) {
             break;
         }
 
+        const vec3 posicionCamara = obtenerPosicionCamara(
+            base.pos[0], base.pos[1], base.pos[2], base.angulo_trans, modoCamara
+        );
+        glUniform3f(
+            glGetUniformLocation(shadersProgram, "viewPos"),
+            posicionCamara.x, posicionCamara.y, posicionCamara.z
+        );
+
         if (iluminacionNoct==1) iluminacionNocturn();
         else iluminacionDiurn();
 
 
-        // Llamo a la funciÛn de dibujado de la escena
+        // Llamo a la funci√≥n de dibujado de la escena
         display();
 
         // Intercambio los buffers para mostrar la imagen renderizada en pantalla
@@ -592,7 +639,7 @@ int main(int argc, char** argv) {
         glfwPollEvents();
     }
 
-    // Limpio los recursos de OpenGL al cerrar la aplicaciÛn
+    // Limpio los recursos de OpenGL al cerrar la aplicaci√≥n
     glDeleteVertexArrays(1, &VAOCubo);
     glDeleteVertexArrays(1, &VAOCuadrado);
     glDeleteVertexArrays(1, &VAOEsfera);
@@ -606,6 +653,10 @@ int main(int argc, char** argv) {
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    (void)window;
+    (void)scancode;
+    (void)mods;
+
     // Almacena el estado de la tecla (presionada o liberada)
     teclas[key] = (action != GLFW_RELEASE);
     teclas2[key] = (action == GLFW_RELEASE);
@@ -618,7 +669,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (teclas2[GLFW_KEY_D]) {
         giroIzquierda = 0;
     }
-    // Controles de movimiento y rotaciÛn
+    // Controles de movimiento y rotaci√≥n
     if (teclas[GLFW_KEY_A]) {
         base.angulo_trans += 4;
         giroDerecha = 1;
@@ -636,17 +687,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (teclas[GLFW_KEY_J]) articulacion1.angulo_trans--;
     if (teclas[GLFW_KEY_L]) articulacion1.angulo_trans++;
 
-    // Controles de ·ngulos de c·mara
+    // Controles de √°ngulos de c√°mara
     if (teclas[GLFW_KEY_UP]) beta++;
     if (teclas[GLFW_KEY_DOWN]) beta--;
     if (teclas[GLFW_KEY_LEFT]) alpha--;
     if (teclas[GLFW_KEY_RIGHT]) alpha++;
 
-    // ModificaciÛn de la distancia
+    // Modificaci√≥n de la distancia
     if (teclas[47]) DISTANCIA += 1.0f;
     if (teclas[93]) DISTANCIA = std::max(1.0f, DISTANCIA - 1.0f); // Evita valores negativos
 
-    // Cambio de modo de c·mara
+    // Cambio de modo de c√°mara
     if (teclas[GLFW_KEY_1]) modoCamara = 1;
     if (teclas[GLFW_KEY_2]) modoCamara = 2;
     if (teclas[GLFW_KEY_3]) modoCamara = 3;
@@ -654,6 +705,50 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (teclas[GLFW_KEY_N]) {
         iluminacionNoct = !iluminacionNoct;
     }
+}
+
+void glfwErrorCallback(int error, const char* description) {
+    std::cerr << "GLFW error " << error << ": " << description << std::endl;
+}
+
+void inicializarRutaRecursos(const char* argv0) {
+    namespace fs = std::filesystem;
+
+    std::vector<fs::path> candidatas;
+
+#if defined(__linux__)
+    char rutaEjecutable[4096];
+    ssize_t longitud = readlink("/proc/self/exe", rutaEjecutable, sizeof(rutaEjecutable) - 1);
+    if (longitud > 0) {
+        rutaEjecutable[longitud] = '\0';
+        candidatas.emplace_back(fs::path(rutaEjecutable).parent_path());
+    }
+#endif
+
+    if (argv0 != nullptr && argv0[0] != '\0') {
+        candidatas.emplace_back(fs::absolute(fs::path(argv0)).parent_path());
+    }
+
+    candidatas.emplace_back(fs::current_path());
+    candidatas.emplace_back(fs::current_path() / "Grua");
+
+    for (const fs::path& candidata : candidatas) {
+        if (fs::exists(candidata / "shader.vert") && fs::exists(candidata / "shader.frag")) {
+            rutaBaseRecursos = candidata;
+            return;
+        }
+    }
+
+    rutaBaseRecursos = fs::current_path();
+}
+
+std::string rutaRecurso(const char* nombre) {
+    const std::filesystem::path ruta = rutaBaseRecursos / nombre;
+    if (std::filesystem::exists(ruta)) {
+        return ruta.string();
+    }
+
+    return std::string(nombre);
 }
 
 // Procesar la entrada del usuario
@@ -664,16 +759,18 @@ void processInput(GLFWwindow* window) {
 }
 
 
-// FunciÛn para ajustar la ventana y la proyecciÛn
+// Funci√≥n para ajustar la ventana y la proyecci√≥n
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height); // Actualiza el tamaÒo del viewport
+    (void)window;
+
+    glViewport(0, 0, width, height); // Actualiza el tama√±o del viewport
 
     W_WIDTH = width;
     W_HEIGHT = height;
 
     switch (modoCamara) {
     case 1:
-        myCamaraExterior(width, height); // Si necesita alg˙n par·metro especÌfico, actualÌzalo aquÌ
+        myCamaraExterior(width, height); // Si necesita alg√∫n par√°metro espec√≠fico, actual√≠zalo aqu√≠
         break;
     case 2:
         myCamaraPrimeraPersona(width, height, base.pos[0], base.pos[1], base.pos[2], base.angulo_trans);
@@ -684,7 +781,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     }
 }
 
-// FunciÛn para manejar el tiempo de ejecuciÛn
+// Funci√≥n para manejar el tiempo de ejecuci√≥n
 void tiempo() {
     static float unSegundo = 0;
     currentTime = glfwGetTime();
@@ -702,9 +799,10 @@ void tiempo() {
 
 
 
-// FunciÛn para cargar una textura desde un archivo de imagen
+// Funci√≥n para cargar una textura desde un archivo de imagen
 GLuint cargaTextura(const char* nombre) {
     GLuint textura;
+    const std::string rutaTextura = rutaRecurso(nombre);
 
     // Genera un identificador para la textura
     glGenTextures(1, &textura);
@@ -712,13 +810,13 @@ GLuint cargaTextura(const char* nombre) {
     // Activa (vincula) la textura como una textura 2D
     glBindTexture(GL_TEXTURE_2D, textura);
 
-    // Configura el modo de envoltura (wrapping) en S y T (horizontal y vertical) a repeticiÛn
+    // Configura el modo de envoltura (wrapping) en S y T (horizontal y vertical) a repetici√≥n
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Establece el tipo de filtrado para minimizar y magnificar la textura
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Suavizado al reducir tamaÒo
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Suavizado al aumentar tamaÒo
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Suavizado al reducir tama√±o
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Suavizado al aumentar tama√±o
 
     // Indica que la imagen se debe voltear verticalmente al cargar
     stbi_set_flip_vertically_on_load(1);
@@ -727,13 +825,13 @@ GLuint cargaTextura(const char* nombre) {
     int width, height, nrChannels;
 
     // Carga la imagen usando stb_image
-    unsigned char* data = stbi_load(nombre, &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load(rutaTextura.c_str(), &width, &height, &nrChannels, 0);
 
-    // Si se cargÛ correctamente la imagen
+    // Si se carg√≥ correctamente la imagen
     if (data) {
         GLenum format;
 
-        // Determina el formato de la textura seg˙n el n˙mero de canales
+        // Determina el formato de la textura seg√∫n el n√∫mero de canales
         if (nrChannels == 1) format = GL_RED;
         else if (nrChannels == 3) format = GL_RGB;
         else if (nrChannels == 4) format = GL_RGBA;
@@ -742,12 +840,12 @@ GLuint cargaTextura(const char* nombre) {
         // Crea la textura en memoria de video
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
-        // Genera los mipmaps autom·ticamente (niveles de detalle)
+        // Genera los mipmaps autom√°ticamente (niveles de detalle)
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else {
         // Si falla la carga, imprime un mensaje de error
-        printf("Error cargando textura: %s\n", nombre);
+        printf("Error cargando textura: %s\n", rutaTextura.c_str());
         printf("stbi_failure_reason: %s\n", stbi_failure_reason());
     }
 

@@ -1,10 +1,9 @@
-// Copyright (c) 2025 Adri√°n Quiroga Linares Lectura y referencia permitidas; reutilizaci√≥n y plagio prohibidos
+// Copyright (c) 2025 Adrian Quiroga Linares. Lectura y referencia permitidas; reutilizacion y plagio prohibidos.
 
-#include <windows.h>	
-#include <glut.h>	
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
+#include <string.h>
 
 #include "planetas.h"
 
@@ -18,7 +17,7 @@ float alpha = 0;
 float beta = 0;
 int modo = 0;
 int objetivo = 0;
-int luzEncendida = 1; // 1 significa que est· encendida, 0 apagada
+int luzEncendida = 1; // 1 significa que est√° encendida, 0 apagada
 
 
 int dibujarOrbitas = 1;
@@ -26,10 +25,10 @@ int dibujarEjes = 0;
 int iluminacion = 1;
 
 extern int modo;      // Variable global que indica el modo de vista
-extern int objetivo;  // Variable global que indica quÈ planeta ver
+extern int objetivo;  // Variable global que indica qu√© planeta ver
 
-// Necesito calcular la posicion absoluta en el modelo para poder ubicar correctamente la camara, por eso tengo esta funciÛn.
-// El funcionamiento b·sico es aplicar las formulas dadas y mirando la posicion del padre calcular la del hijo de forma recursiva
+// Necesito calcular la posicion absoluta en el modelo para poder ubicar correctamente la camara, por eso tengo esta funci√≥n.
+// El funcionamiento b√°sico es aplicar las formulas dadas y mirando la posicion del padre calcular la del hijo de forma recursiva
 void calcularPosicionAbsoluta(Planeta *p) {
         if (p == nullptr)
                 return;
@@ -49,22 +48,22 @@ void calcularPosicionAbsoluta(Planeta *p) {
         else if (strcmp(p->nombre, "iss") == 0)
                 inclinacion = 25.0f * PI / 180.0f;
 
-        // PosiciÛn en su Ûrbita (asumiendo Ûrbita circular)
+        // Posici√≥n en su √≥rbita (asumiendo √≥rbita circular)
         x += p->distanciaOrbita * cos(p->anguloTraslacion);
         y += sin(inclinacion) * p->distanciaOrbita * sin(p->anguloTraslacion) ;
         z += p->distanciaOrbita * sin(p->anguloTraslacion) * cos(inclinacion);
 
-        // Guardar la nueva posiciÛn
+        // Guardar la nueva posici√≥n
         p->posicion[0] = x;
         p->posicion[1] = y;
         p->posicion[2] = z;
 }
 
-// FunciÛn que maneja las opciones del men˙ contextual
+// Funci√≥n que maneja las opciones del men√∫ contextual
 void menuCallback(int option) {
     if (option >= 0 && option <= 8) {
         modo = 1;       // Activar el modo telescopio
-        objetivo = option; // Cambiar el objetivo de la c·mara
+        objetivo = option; // Cambiar el objetivo de la c√°mara
     }
     else if (option == 9) {
         modo = 0;       // Regresar al modo libre
@@ -72,34 +71,34 @@ void menuCallback(int option) {
     glutPostRedisplay(); // Refrescar la pantalla
 }
 
-// FunciÛn para crear el men˙ y asociarlo al clic derecho
+// Funci√≥n para crear el men√∫ y asociarlo al clic derecho
 void crearMenu() {
-    int menu = glutCreateMenu(menuCallback);
+    glutCreateMenu(menuCallback);
     glutAddMenuEntry("Ver el Sol", 0);
     glutAddMenuEntry("Ver Mercurio", 1);
     glutAddMenuEntry("Ver Venus", 2);
     glutAddMenuEntry("Ver la Tierra desde la Luna", 3);
     glutAddMenuEntry("Ver la Tierra desde la ISS", 4);
     glutAddMenuEntry("Ver Marte", 5);
-    glutAddMenuEntry("Ver J˙piter", 6);
+    glutAddMenuEntry("Ver J√∫piter", 6);
     glutAddMenuEntry("Ver Saturno", 7);
     glutAddMenuEntry("Ver Urano", 8);
     glutAddMenuEntry("Modo Libre", 9);
 
-    // Asociar el men˙ al botÛn derecho del mouse
+    // Asociar el men√∫ al bot√≥n derecho del mouse
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
-// funcion que define la posicion de la c·mara
+// funcion que define la posicion de la c√°mara
 void myCamara(float ratio, Planeta **arrPlanetas, int nPlanetas){
-        // Configuro la matriz de ProyecciÛn
+        // Configuro la matriz de Proyecci√≥n
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         gluPerspective(45, ratio, 0.1f, 3000.0f);
 
 
-        // Configuro la posiciÛn de la c·mara
-        if (modo == 0) // si es el modo default se puede rotar y girar la c·mara, lo de (cos(beta) >= 0 ? 1 : -1) evita que dÈ el famoso salto.
+        // Configuro la posici√≥n de la c√°mara
+        if (modo == 0) // si es el modo default se puede rotar y girar la c√°mara, lo de (cos(beta) >= 0 ? 1 : -1) evita que d√© el famoso salto.
                 gluLookAt(((float) DISTANCIA * (float) sin(alpha) * cos(beta)), ((float) DISTANCIA * (float) sin(beta)), ((float) DISTANCIA * cos(alpha) * cos(beta)), 0, 0, 0, 0, (cos(beta) >= 0 ? 1 : -1), 0);
 
         else {
@@ -115,7 +114,7 @@ void myCamara(float ratio, Planeta **arrPlanetas, int nPlanetas){
                 Planeta *saturno = encontrarPlaneta(arrPlanetas, nPlanetas, "saturno");
                 Planeta *urano = encontrarPlaneta(arrPlanetas, nPlanetas, "urano");
 
-                // Para decidir a quÈ planeta mirar desde la Tierra o desde la ISS o Luna, basicamente le paso las posicions de los planetas a la c·mara.
+                // Para decidir a qu√© planeta mirar desde la Tierra o desde la ISS o Luna, basicamente le paso las posicions de los planetas a la c√°mara.
                 //gluLookAt(posCam, posObjetivo, "arriba")
                 switch (objetivo) {
                 case 0: // Sol
@@ -144,7 +143,7 @@ void myCamara(float ratio, Planeta **arrPlanetas, int nPlanetas){
                         gluLookAt(tierra->posicion[0], tierra->posicion[1], tierra->posicion[2],
                                   marte->posicion[0], marte->posicion[1], marte->posicion[2], 0, (cos(beta) >= 0 ? 1 : -1), 0);
                         break;
-                case 6: // J˙piter
+                case 6: // J√∫piter
                         gluLookAt(tierra->posicion[0], tierra->posicion[1], tierra->posicion[2],
                                   jupiter->posicion[0], jupiter->posicion[1], jupiter->posicion[2], 0, (cos(beta) >= 0 ? 1 : -1), 0);
                         break;
@@ -157,7 +156,7 @@ void myCamara(float ratio, Planeta **arrPlanetas, int nPlanetas){
                                   urano->posicion[0], urano->posicion[1], urano->posicion[2], 0, (cos(beta) >= 0 ? 1 : -1), 0);
                         break;
                 default:
-                        std::cerr << "Error: OpciÛn no v·lida en el men˙.\n";
+                        std::cerr << "Error: Opci√≥n no v√°lida en el men√∫.\n";
                         break;
                 }
         }
@@ -166,7 +165,58 @@ void myCamara(float ratio, Planeta **arrPlanetas, int nPlanetas){
 
 //funcion que detecta las pulsaciones de las teclas
 void myTeclado(unsigned char tras, int x, int y) {
+    (void)x;
+    (void)y;
     switch (tras) {
+    case '1':
+        modo = 1;
+        objetivo = 0; // Sol
+        break;
+
+    case '2':
+        modo = 1;
+        objetivo = 1; // Mercurio
+        break;
+
+    case '3':
+        modo = 1;
+        objetivo = 2; // Venus
+        break;
+
+    case '4':
+        modo = 1;
+        objetivo = 3; // Tierra desde la Luna
+        break;
+
+    case '5':
+        modo = 1;
+        objetivo = 4; // Tierra desde la ISS
+        break;
+
+    case '6':
+        modo = 1;
+        objetivo = 5; // Marte
+        break;
+
+    case '7':
+        modo = 1;
+        objetivo = 6; // Jupiter
+        break;
+
+    case '8':
+        modo = 1;
+        objetivo = 7; // Saturno
+        break;
+
+    case '9':
+        modo = 1;
+        objetivo = 8; // Urano
+        break;
+
+    case '0':
+        modo = 0; // Volver al modo libre
+        break;
+
     case '-':
         DISTANCIA += 10; //decremento el zoom
         break;
@@ -205,7 +255,7 @@ void myTeclado(unsigned char tras, int x, int y) {
         break;
 
     case 'b':
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //para ver el ·rea de los polÌgonos coloreada
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //para ver el √°rea de los pol√≠gonos coloreada
         break;
 
     }
@@ -214,8 +264,10 @@ void myTeclado(unsigned char tras, int x, int y) {
     glutPostRedisplay();
 }
 
-//funcion para mover la c·mara, donde incremento y decremento los valores de alpha y beta
+//funcion para mover la c√°mara, donde incremento y decremento los valores de alpha y beta
 void moverCamara(int cursor, int x, int y){
+        (void)x;
+        (void)y;
         switch (cursor) {
         case GLUT_KEY_F1:
                 break;

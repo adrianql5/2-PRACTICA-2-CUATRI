@@ -1,17 +1,10 @@
-// Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
-
 #ifndef OBJETOS_H
 #define OBJETOS_H
 
-#include <Windows.h>
 #include <iostream>
 #include <stdio.h>
 
-#include <glad.h>
-#include <glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "deps.h"
 
 using namespace glm;
 
@@ -26,10 +19,10 @@ void crearEsfera();
 
 
 typedef struct {
-	vec3 pos;          // Posici�n en 3D
+	vec3 pos;          // Posición en 3D
 	float velocidad;   // Velocidad del objeto
 	vec3 escalado;     // Escalado en 3D
-	float angulo_trans; // �ngulo de translaci�n
+	float angulo_trans; // Ángulo de translación
 	vec3 color;    // Color RGB
 	int textura; 
 } Objeto;
